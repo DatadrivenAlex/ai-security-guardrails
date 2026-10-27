@@ -1,0 +1,75 @@
+# Default policy for the educational guardrail demo.
+# This file is trusted operator configuration, not end-user input.
+# Patterns are regular expressions. Keep them short and specific.
+# See docs/owasp-llm-top-10.md for what these rules do and do not cover.
+
+id: default
+version: 1
+description: >
+  Portfolio policy. Flags instruction override, common jailbreak phrasing,
+  obfuscated payloads, PII, secret-shaped strings, system-prompt echo,
+  and a small operator denylist.
+
+# Severity points: low 15, medium 35, high 60, critical 85. Weights multiply those points.
+# The score is capped at 100 and is explanatory. The decision follows suggested actions:
+# any "deny" finding denies the call; PII findings request a rewrite.
+thresholds:
+  deny: 70
+  rewrite: 25
+
+# Minimum system-prompt fragment (characters, after whitespace collapse) required
+# before a completion is treated as echoing that prompt. Short prompts are skipped
+# so generic phrases such as "be helpful" do not match.
+echo_min_chars: 48
+
+detectors:
+  instruction_override:
+    enabled: true
+    weight: 1.0
+  jailbreak:
+    enabled: true
+    weight: 1.0
+  roleplay_escape:
+    enabled: true
+    weight: 1.0
+  encoded_payload:
+    enabled: true
+    weight: 1.0
+  pii:
+    enabled: true
+    weight: 1.0
+  secret_leak:
+    enabled: true
+    weight: 1.0
+  system_prompt_echo:
+    enabled: true
+    weight: 1.0
+  denylist:
+    enabled: true
+    weight: 1.0
+
+# If a finding's matched span sits entirely inside one of these substrings
+# (case-insensitive), the finding is dropped. Use this for known false positives.
+allowlist:
+  substrings:
+    - "do not exfiltrate customer data"
+
+denylist:
+  - id: destructive-shell
+    pattern: '(?i)\brm\s+-rf\b'
+    severity: high
+    reason: >
+      Destructive shell command in text that a tool-using agent might execute.
+      This does not inspect a real shell.
+    owasp_id: LLM06
+    applies_to:
+      - prompt
+      - completion
+  - id: exfiltrate-keyword
+    pattern: '(?i)\bexfiltrate\b'
+    severity: high
+    reason: Example keyword rule for data-theft phrasing. Not a semantic classifier.
+    owasp_id: LLM01
+    applies_to:
+      - prompt
+      - completion

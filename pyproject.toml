@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-security-guardrails"
+version = "0.1.0"
+description = "Educational LLM request firewall that inspects prompts and completions before they reach or leave a model."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Alexandru Cojocari" }]
+keywords = [
+    "llm",
+    "ai-security",
+    "prompt-injection",
+    "guardrails",
+    "pii",
+    "owasp",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+dependencies = [
+    "fastapi>=0.115",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "pyyaml>=6.0",
+    "prometheus-client>=0.21",
+    "structlog>=24.4",
+    "uvicorn>=0.32",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx2>=2.4",
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
+
+[project.scripts]
+guardrails = "guardrails.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/DatadrivenAlex/ai-security-guardrails"
+Repository = "https://github.com/DatadrivenAlex/ai-security-guardrails"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src/guardrails"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
